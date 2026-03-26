@@ -36,12 +36,12 @@ const renderLabelCell = (label: string) => (
 
 const renderTable = (years: YearEntry[], rows: Array<[string, RowFormatter]>) => (
   <div className="overflow-x-auto">
-    <table className="w-full min-w-[980px] text-left text-sm">
+    <table className="w-full min-w-[980px] table-fixed text-left text-sm tabular-nums">
       <thead>
         <tr className="border-b border-stone-200 text-stone-500">
-          <th className="py-2 pr-4">Item</th>
+          <th className="w-44 py-2 pr-4">Item</th>
           {years.map((year) => (
-            <th key={year.label} className="py-2 pr-4">
+            <th key={year.label} className="w-32 py-2 pr-4">
               {year.label}
             </th>
           ))}
@@ -50,9 +50,9 @@ const renderTable = (years: YearEntry[], rows: Array<[string, RowFormatter]>) =>
       <tbody>
         {rows.map(([label, formatter]) => (
           <tr key={label} className={getRowClassName(label)}>
-            <td className="py-2 pr-4 font-medium text-stone-900">{renderLabelCell(label)}</td>
+            <td className="w-44 py-2 pr-4 font-medium text-stone-900">{renderLabelCell(label)}</td>
             {years.map((year) => (
-              <td key={`${label}-${year.label}`} className="py-2 pr-4 text-stone-700">
+              <td key={`${label}-${year.label}`} className="w-32 py-2 pr-4 text-stone-700">
                 {formatter(year)}
               </td>
             ))}
@@ -98,12 +98,12 @@ export function BalanceSheetTable({ years }: { years: YearEntry[] }) {
 export function OperatingSnapshotTable({ years }: { years: YearEntry[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[1080px] text-left text-sm">
+      <table className="w-full min-w-[1080px] table-fixed text-left text-sm tabular-nums">
         <thead>
           <tr className="border-b border-stone-200 text-stone-500">
-            <th className="py-2 pr-4">Item</th>
+            <th className="w-44 py-2 pr-4">Item</th>
             {years.map((year) => (
-              <th key={year.label} className="py-2 pr-4">
+              <th key={year.label} className="w-32 py-2 pr-4">
                 {year.label}
               </th>
             ))}
@@ -133,11 +133,14 @@ export function OperatingSnapshotTable({ years }: { years: YearEntry[] }) {
             ],
           ].map(([label, formatter]) => (
             <tr key={label as string} className={getRowClassName(label as string)}>
-              <td className="py-2 pr-4 font-medium text-stone-900">
+              <td className="w-44 py-2 pr-4 font-medium text-stone-900">
                 {renderLabelCell(label as string)}
               </td>
               {years.map((year) => (
-                <td key={`${label as string}-${year.label}`} className="py-2 pr-4 text-stone-700">
+                <td
+                  key={`${label as string}-${year.label}`}
+                  className="w-32 py-2 pr-4 text-stone-700"
+                >
                   {(formatter as RowFormatter)(year)}
                 </td>
               ))}
