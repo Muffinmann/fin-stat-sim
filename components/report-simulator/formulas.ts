@@ -1,0 +1,16 @@
+export const rowFormulas: Record<string, string> = {
+  Revenue: 'Revenue = Cups sold × Price per cup',
+  EBIT: 'EBIT = Revenue - COGS - Labor cost - Depreciation',
+  EBT: 'EBT = EBIT - Interest expense',
+  'Net income': 'Net income = EBT - Taxes',
+  CFO: 'CFO = Net income + Depreciation - Change in inventory',
+  CFI: 'CFI = -Capex',
+  CFF: 'CFF = Equity issued + Debt issued - Debt repaid',
+  'Change in cash': 'Change in cash = CFO + CFI + CFF',
+  'Ending cash': 'Ending cash = Beginning cash + CFO + CFI + CFF',
+  'Total assets': 'Total assets = Cash + Inventory + Fixed assets + Goodwill',
+  'Shareholders equity': 'Shareholders equity = Total assets - Total liabilities',
+  'Book value per share': 'Book value per share = Shareholders equity / Shares outstanding',
+  EPS: 'EPS = Net income / Shares outstanding',
+  'Revenue growth': 'Revenue growth = (Current year revenue - Prior year revenue) / Prior year revenue',
+}

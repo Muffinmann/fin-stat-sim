@@ -25,3 +25,16 @@ export const formatCurrency = (value: number) => currencyFormatter.format(Math.r
 export const formatPrice = (value: number) => priceFormatter.format(value)
 export const formatPercent = (value: number) => `${percentFormatter.format(value)}%`
 export const formatNumber = (value: number) => decimalFormatter.format(value)
+export const formatAccountingCurrency = (value: number) => {
+  if (value < 0) {
+    return `(${currencyFormatter.format(Math.abs(Math.round(value)))})`
+  }
+  return formatCurrency(value)
+}
+
+export const formatAccountingPrice = (value: number) => {
+  if (value < 0) {
+    return `(${priceFormatter.format(Math.abs(value))})`
+  }
+  return formatPrice(value)
+}
