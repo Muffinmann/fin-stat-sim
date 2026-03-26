@@ -7,7 +7,11 @@ import { BalanceSheetTable, CashFlowTable, OperatingSnapshotTable } from './Fina
 import { formatCurrency, formatPrice } from './format'
 import ParameterPanel from './ParameterPanel'
 import { buildProjection, clampNumber } from './projection'
-import TrendCharts from './TrendCharts'
+import {
+  BaselineComparisonView,
+  ProfitBridgeView,
+  SensitivityView,
+} from './ScenarioViews'
 import { DataCard } from './ui'
 import type { ParameterTab, Params, ScheduleParamKey } from './types'
 
@@ -88,8 +92,16 @@ export default function ReportSimulator() {
         />
 
         <div className="space-y-8">
-          <DataCard title="5 年趋势图">
-            <TrendCharts years={years} />
+          <DataCard title="Version A · 基准 vs 当前">
+            <BaselineComparisonView params={params} />
+          </DataCard>
+
+          <DataCard title="Version B · 经营到现金桥图">
+            <ProfitBridgeView years={years} />
+          </DataCard>
+
+          <DataCard title="Version C · 参数敏感度">
+            <SensitivityView params={params} />
           </DataCard>
 
           <DataCard title="Operating Snapshot">
