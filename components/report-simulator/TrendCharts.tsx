@@ -2,7 +2,50 @@ import { chartYearLabels, lineSeries } from './config'
 import { formatCurrency } from './format'
 import type { YearEntry } from './types'
 
-const getLinePath = (values: number[], width: number, height: number, maxValue: number) => {
+type ChartRange = {
+  min: number
+  max: number
+}
+
+const getChartRange = (values: number[]): ChartRange => {
+  if (values.length === 0) {
+    return { min: 0, max: 1 }
+  }
+
+  const rawMin = Math.min(...values)
+  const rawMax = Math.max(...values)
+
+  if (rawMin === rawMax) {
+    if (rawMin === 0) {
+      return { min: -1, max: 1 }
+    }
+
+    const padding = Math.max(Math.abs(rawMin) * 0.15, 1)
+    return {
+      min: rawMin - padding,
+      max: rawMax + padding,
+    }
+  }
+
+  const span = rawMax - rawMin
+  const padding = Math.max(span * 0.08, 1)
+
+  return {
+    min: rawMin - padding,
+    max: rawMax + padding,
+  }
+}
+
+const getValueY = (value: number, height: number, range: ChartRange) => {
+  const span = range.max - range.min
+  if (span <= 0) {
+    return height / 2
+  }
+
+  return height - ((value - range.min) / span) * height
+}
+
+const getLinePath = (values: number[], width: number, height: number, range: ChartRange) => {
   if (values.length === 0) {
     return ''
   }
@@ -11,17 +54,10 @@ const getLinePath = (values: number[], width: number, height: number, maxValue: 
   return values
     .map((value, index) => {
       const x = stepX * index
-      const y = height - (value / maxValue) * height
+      const y = getValueY(value, height, range)
       return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
     })
     .join(' ')
-}
-
-const getValueY = (value: number, height: number, maxValue: number) => {
-  if (maxValue <= 0) {
-    return height
-  }
-  return height - (value / maxValue) * height
 }
 
 export default function TrendCharts({ years }: { years: YearEntry[] }) {
@@ -44,8 +80,10 @@ export default function TrendCharts({ years }: { years: YearEntry[] }) {
       <div className="grid gap-4 lg:grid-cols-2">
         {lineSeries.map((series) => {
           const values = years.map((year) => year[series.key as keyof YearEntry] as number)
-          const maxValue = Math.max(1, ...values)
-          const yTicks = [maxValue, maxValue / 2, 0]
+          const range = getChartRange(values)
+          const yTicks = [range.max, (range.max + range.min) / 2, range.min]
+          const zeroLineY =
+            range.min <= 0 && range.max >= 0 ? getValueY(0, plotHeight, range) : null
 
           return (
             <div
@@ -70,7 +108,7 @@ export default function TrendCharts({ years }: { years: YearEntry[] }) {
                 aria-label={`${series.label} five-year trend chart`}
               >
                 {yTicks.map((tickValue, index) => {
-                  const y = getValueY(tickValue, plotHeight, maxValue)
+                  const y = getValueY(tickValue, plotHeight, range)
                   return (
                     <g key={`${series.key}-tick-${index}`}>
                       <line
@@ -95,6 +133,18 @@ export default function TrendCharts({ years }: { years: YearEntry[] }) {
                   )
                 })}
 
+                {zeroLineY !== null ? (
+                  <line
+                    x1={yAxisWidth}
+                    y1={topPadding + zeroLineY}
+                    x2={chartWidth - rightPadding}
+                    y2={topPadding + zeroLineY}
+                    stroke="currentColor"
+                    strokeOpacity="0.3"
+                    strokeDasharray="4 4"
+                  />
+                ) : null}
+
                 <line
                   x1={yAxisWidth}
                   y1={topPadding}
@@ -114,7 +164,7 @@ export default function TrendCharts({ years }: { years: YearEntry[] }) {
 
                 <g transform={`translate(${yAxisWidth}, ${topPadding})`}>
                   <path
-                    d={getLinePath(values, plotWidth, plotHeight, maxValue)}
+                    d={getLinePath(values, plotWidth, plotHeight, range)}
                     fill="none"
                     stroke={series.color}
                     strokeWidth="3"
@@ -124,7 +174,7 @@ export default function TrendCharts({ years }: { years: YearEntry[] }) {
 
                   {values.map((value, index) => {
                     const x = values.length === 1 ? 0 : (plotWidth / (values.length - 1)) * index
-                    const y = getValueY(value, plotHeight, maxValue)
+                    const y = getValueY(value, plotHeight, range)
 
                     return (
                       <g key={`${series.key}-point-${years[index].label}`}>
