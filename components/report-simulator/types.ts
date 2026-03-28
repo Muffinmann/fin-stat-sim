@@ -16,6 +16,7 @@ export type YearEntry = {
   taxes: number
   netIncome: number
   eps: number
+  perShareGrowth: number | null
   revenueGrowth: number | null
   beginningCash: number
   changeInInventory: number

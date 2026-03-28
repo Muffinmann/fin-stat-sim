@@ -3,7 +3,14 @@
 import { useState } from 'react'
 
 import { defaultParams } from './config'
-import { BalanceSheetTable, CashFlowTable, OperatingSnapshotTable } from './FinancialTables'
+import {
+  balanceSheetRows,
+  BalanceSheetTable,
+  cashFlowRows,
+  CashFlowTable,
+  operatingSnapshotRows,
+  OperatingSnapshotTable,
+} from './FinancialTables'
 import { formatCurrency, formatPrice } from './format'
 import ParameterPanel from './ParameterPanel'
 import { buildProjection, clampNumber } from './projection'
@@ -14,6 +21,41 @@ import {
 } from './ScenarioViews'
 import { DataCard } from './ui'
 import type { ParameterTab, Params, ScheduleParamKey } from './types'
+
+const buildTableMarkdown = (
+  title: string,
+  years: ReturnType<typeof buildProjection>,
+  rows: Array<[string, (year: (typeof years)[number]) => string]>
+) => {
+  const lines = [
+    `# ${title}`,
+    '',
+    `导出时间: ${new Date().toLocaleString('zh-CN', { hour12: false })}`,
+    '',
+    `| Item | ${years.map((year) => year.label).join(' | ')} |`,
+    `| --- | ${years.map(() => '---').join(' | ')} |`,
+  ]
+
+  rows.forEach(([label, formatter]) => {
+    lines.push(`| ${label} | ${years.map((year) => formatter(year)).join(' | ')} |`)
+  })
+
+  lines.push('')
+  return lines.join('\n')
+}
+
+const downloadMarkdown = (filename: string, markdown: string) => {
+  const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
 
 export default function ReportSimulator() {
   const [params, setParams] = useState<Params>(defaultParams)
@@ -35,6 +77,35 @@ export default function ReportSimulator() {
   }
 
   const finalYear = years[years.length - 1]
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+
+  const TableExportButton = ({
+    label,
+    filename,
+    rows,
+  }: {
+    label: string
+    filename: string
+    rows: Array<[string, (year: (typeof years)[number]) => string]>
+  }) => (
+    <button
+      type="button"
+      aria-label={`导出 ${label} Markdown`}
+      title={`导出 ${label} Markdown`}
+      onClick={() => downloadMarkdown(filename, buildTableMarkdown(label, years, rows))}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-500 transition hover:border-emerald-700 hover:text-emerald-700"
+    >
+      <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true">
+        <path
+          d="M10 3.5v8m0 0 3-3m-3 3-3-3M4.5 12.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  )
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
@@ -104,15 +175,42 @@ export default function ReportSimulator() {
             <SensitivityView params={params} />
           </DataCard>
 
-          <DataCard title="Operating Snapshot">
+          <DataCard
+            title="Operating Snapshot"
+            actions={
+              <TableExportButton
+                label="Operating Snapshot"
+                filename={`operating-snapshot-${stamp}.md`}
+                rows={operatingSnapshotRows}
+              />
+            }
+          >
             <OperatingSnapshotTable years={years} />
           </DataCard>
 
-          <DataCard title="Cash Flow">
+          <DataCard
+            title="Cash Flow"
+            actions={
+              <TableExportButton
+                label="Cash Flow"
+                filename={`cash-flow-${stamp}.md`}
+                rows={cashFlowRows}
+              />
+            }
+          >
             <CashFlowTable years={years} />
           </DataCard>
 
-          <DataCard title="Balance Sheet">
+          <DataCard
+            title="Balance Sheet"
+            actions={
+              <TableExportButton
+                label="Balance Sheet"
+                filename={`balance-sheet-${stamp}.md`}
+                rows={balanceSheetRows}
+              />
+            }
+          >
             <BalanceSheetTable years={years} />
           </DataCard>
         </div>

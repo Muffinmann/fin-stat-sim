@@ -88,7 +88,11 @@ export const buildProjection = (params: Params) => {
     const totalLiabilities = debt
     const shareholdersEquity = totalAssets - totalLiabilities
 
+    const eps = params.sharesOutstanding === 0 ? 0 : roundMoney(netIncome / params.sharesOutstanding)
     const lastYearRevenue = years[yearIndex - 1]?.revenue
+    const lastYearEps = years[yearIndex - 1]?.eps
+    const perShareGrowth =
+      lastYearEps && lastYearEps > 0 ? ((eps - lastYearEps) / lastYearEps) * 100 : null
     const revenueGrowth =
       lastYearRevenue && lastYearRevenue > 0
         ? ((revenue - lastYearRevenue) / lastYearRevenue) * 100
@@ -111,7 +115,8 @@ export const buildProjection = (params: Params) => {
       ebt: roundMoney(ebt),
       taxes: roundMoney(taxes),
       netIncome: roundMoney(netIncome),
-      eps: params.sharesOutstanding === 0 ? 0 : roundMoney(netIncome / params.sharesOutstanding),
+      eps,
+      perShareGrowth,
       revenueGrowth,
       beginningCash: roundMoney(beginningCash),
       changeInInventory: roundMoney(changeInInventory),

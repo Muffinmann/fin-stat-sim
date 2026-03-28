@@ -86,10 +86,19 @@ export const ScheduleRow = ({
   </tr>
 )
 
-export const DataCard = ({ title, children }: { title: string; children: ReactNode }) => (
+export const DataCard = ({
+  title,
+  actions,
+  children,
+}: {
+  title: string
+  actions?: ReactNode
+  children: ReactNode
+}) => (
   <section className="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-[0_20px_50px_-35px_rgba(0,0,0,0.45)]">
-    <div className="border-b border-stone-200 px-5 py-4">
+    <div className="flex items-center justify-between gap-3 border-b border-stone-200 px-5 py-4">
       <h4 className="text-lg font-semibold text-stone-900">{title}</h4>
+      {actions ? <div className="shrink-0">{actions}</div> : null}
     </div>
     <div className="p-5">{children}</div>
   </section>

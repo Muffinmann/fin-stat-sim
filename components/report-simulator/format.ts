@@ -15,6 +15,10 @@ const decimalFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 1,
 })
 
+const integerFormatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0,
+})
+
 const percentFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
@@ -25,6 +29,7 @@ export const formatCurrency = (value: number) => currencyFormatter.format(Math.r
 export const formatPrice = (value: number) => priceFormatter.format(value)
 export const formatPercent = (value: number) => `${percentFormatter.format(value)}%`
 export const formatNumber = (value: number) => decimalFormatter.format(value)
+export const formatInteger = (value: number) => integerFormatter.format(Math.round(value))
 export const formatAccountingCurrency = (value: number) => {
   if (value < 0) {
     return `(${currencyFormatter.format(Math.abs(Math.round(value)))})`

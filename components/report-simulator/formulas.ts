@@ -12,5 +12,6 @@ export const rowFormulas: Record<string, string> = {
   'Shareholders equity': 'Shareholders equity = Total assets - Total liabilities',
   'Book value per share': 'Book value per share = Shareholders equity / Shares outstanding',
   EPS: 'EPS = Net income / Shares outstanding',
+  'Per share growth': 'Per share growth = (Current year EPS - Prior year EPS) / Prior year EPS',
   'Revenue growth': 'Revenue growth = (Current year revenue - Prior year revenue) / Prior year revenue',
 }

@@ -1,6 +1,7 @@
 import {
   formatAccountingCurrency,
   formatAccountingPrice,
+  formatInteger,
   formatNumber,
   formatPercent,
 } from './format'
@@ -9,6 +10,7 @@ import { rowFormulas } from './formulas'
 import type { YearEntry } from './types'
 
 type RowFormatter = (year: YearEntry) => string
+type TableRow = [string, RowFormatter]
 
 const emphasizedRows = new Set([
   'Revenue',
@@ -63,36 +65,63 @@ const renderTable = (years: YearEntry[], rows: Array<[string, RowFormatter]>) =>
   </div>
 )
 
+export const cashFlowRows: TableRow[] = [
+  ['Net income', (year) => formatAccountingCurrency(year.netIncome)],
+  ['Depreciation', (year) => formatAccountingCurrency(year.depreciation)],
+  ['Change in inventory', (year) => formatAccountingCurrency(year.changeInInventory)],
+  ['CFO', (year) => formatAccountingCurrency(year.cfo)],
+  ['Capex', (year) => formatAccountingCurrency(-year.capex)],
+  ['CFI', (year) => formatAccountingCurrency(year.cfi)],
+  ['Equity issued', (year) => formatAccountingCurrency(year.equityIssued)],
+  ['Debt issued', (year) => formatAccountingCurrency(year.debtIssued)],
+  ['Debt repaid', (year) => formatAccountingCurrency(-year.debtRepaid)],
+  ['CFF', (year) => formatAccountingCurrency(year.cff)],
+  ['Beginning cash', (year) => formatAccountingCurrency(year.beginningCash)],
+  ['Change in cash', (year) => formatAccountingCurrency(year.cfo + year.cfi + year.cff)],
+  ['Ending cash', (year) => formatAccountingCurrency(year.endingCash)],
+]
+
+export const balanceSheetRows: TableRow[] = [
+  ['Cash', (year) => formatAccountingCurrency(year.endingCash)],
+  ['Inventory', (year) => formatAccountingCurrency(year.inventory)],
+  ['Fixed assets', (year) => formatAccountingCurrency(year.fixedAssets)],
+  ['Goodwill', (year) => formatAccountingCurrency(year.goodwill)],
+  ['Total assets', (year) => formatAccountingCurrency(year.totalAssets)],
+  ['Debt', (year) => formatAccountingCurrency(year.debt)],
+  ['Total liabilities', (year) => formatAccountingCurrency(year.totalLiabilities)],
+  ['Shareholders equity', (year) => formatAccountingCurrency(year.shareholdersEquity)],
+  ['Book value per share', (year) => formatAccountingPrice(year.bookValuePerShare)],
+]
+
+export const operatingSnapshotRows: TableRow[] = [
+  ['Stands', (year) => formatNumber(year.stands)],
+  ['Cups per stand', (year) => formatInteger(year.cupsPerStand)],
+  ['Cups sold', (year) => formatInteger(year.cupsSold)],
+  ['Price per cup', (year) => formatAccountingPrice(year.pricePerCup)],
+  ['Revenue', (year) => formatAccountingCurrency(year.revenue)],
+  [ 'Revenue growth', (year) => (year.revenueGrowth === null ? '-' : formatPercent(year.revenueGrowth)), ],
+  ['COGS', (year) => formatAccountingCurrency(year.cogs)],
+  ['Labor cost', (year) => formatAccountingCurrency(year.laborCost)],
+  ['Depreciation', (year) => formatAccountingCurrency(year.depreciation)],
+  ['EBIT', (year) => formatAccountingCurrency(year.ebit)],
+  ['EBIT margin', (year) => formatPercent(year.ebitMargin)],
+  ['Interest expense', (year) => formatAccountingCurrency(year.interestExpense)],
+  ['EBT', (year) => formatAccountingCurrency(year.ebt)],
+  ['Taxes', (year) => formatAccountingCurrency(year.taxes)],
+  ['Net income', (year) => formatAccountingCurrency(year.netIncome)],
+  ['EPS', (year) => formatAccountingPrice(year.eps)],
+  [
+    'Per share growth',
+    (year) => (year.perShareGrowth === null ? '-' : formatPercent(year.perShareGrowth)),
+  ],
+]
+
 export function CashFlowTable({ years }: { years: YearEntry[] }) {
-  return renderTable(years, [
-    ['Net income', (year) => formatAccountingCurrency(year.netIncome)],
-    ['Depreciation', (year) => formatAccountingCurrency(year.depreciation)],
-    ['Change in inventory', (year) => formatAccountingCurrency(year.changeInInventory)],
-    ['CFO', (year) => formatAccountingCurrency(year.cfo)],
-    ['Capex', (year) => formatAccountingCurrency(-year.capex)],
-    ['CFI', (year) => formatAccountingCurrency(year.cfi)],
-    ['Equity issued', (year) => formatAccountingCurrency(year.equityIssued)],
-    ['Debt issued', (year) => formatAccountingCurrency(year.debtIssued)],
-    ['Debt repaid', (year) => formatAccountingCurrency(-year.debtRepaid)],
-    ['CFF', (year) => formatAccountingCurrency(year.cff)],
-    ['Beginning cash', (year) => formatAccountingCurrency(year.beginningCash)],
-    ['Change in cash', (year) => formatAccountingCurrency(year.cfo + year.cfi + year.cff)],
-    ['Ending cash', (year) => formatAccountingCurrency(year.endingCash)],
-  ])
+  return renderTable(years, cashFlowRows)
 }
 
 export function BalanceSheetTable({ years }: { years: YearEntry[] }) {
-  return renderTable(years, [
-    ['Cash', (year) => formatAccountingCurrency(year.endingCash)],
-    ['Inventory', (year) => formatAccountingCurrency(year.inventory)],
-    ['Fixed assets', (year) => formatAccountingCurrency(year.fixedAssets)],
-    ['Goodwill', (year) => formatAccountingCurrency(year.goodwill)],
-    ['Total assets', (year) => formatAccountingCurrency(year.totalAssets)],
-    ['Debt', (year) => formatAccountingCurrency(year.debt)],
-    ['Total liabilities', (year) => formatAccountingCurrency(year.totalLiabilities)],
-    ['Shareholders equity', (year) => formatAccountingCurrency(year.shareholdersEquity)],
-    ['Book value per share', (year) => formatAccountingPrice(year.bookValuePerShare)],
-  ])
+  return renderTable(years, balanceSheetRows)
 }
 
 export function OperatingSnapshotTable({ years }: { years: YearEntry[] }) {
@@ -110,28 +139,7 @@ export function OperatingSnapshotTable({ years }: { years: YearEntry[] }) {
           </tr>
         </thead>
         <tbody>
-          {[
-            ['Stands', (year: YearEntry) => formatNumber(year.stands)],
-            ['Cups per stand', (year: YearEntry) => formatNumber(year.cupsPerStand)],
-            ['Cups sold', (year: YearEntry) => formatNumber(year.cupsSold)],
-            ['Price per cup', (year: YearEntry) => formatAccountingPrice(year.pricePerCup)],
-            ['Revenue', (year: YearEntry) => formatAccountingCurrency(year.revenue)],
-            ['COGS', (year: YearEntry) => formatAccountingCurrency(year.cogs)],
-            ['Labor cost', (year: YearEntry) => formatAccountingCurrency(year.laborCost)],
-            ['Depreciation', (year: YearEntry) => formatAccountingCurrency(year.depreciation)],
-            ['EBIT', (year: YearEntry) => formatAccountingCurrency(year.ebit)],
-            ['EBIT margin', (year: YearEntry) => formatPercent(year.ebitMargin)],
-            ['Interest expense', (year: YearEntry) => formatAccountingCurrency(year.interestExpense)],
-            ['EBT', (year: YearEntry) => formatAccountingCurrency(year.ebt)],
-            ['Taxes', (year: YearEntry) => formatAccountingCurrency(year.taxes)],
-            ['Net income', (year: YearEntry) => formatAccountingCurrency(year.netIncome)],
-            ['EPS', (year: YearEntry) => formatAccountingPrice(year.eps)],
-            [
-              'Revenue growth',
-              (year: YearEntry) =>
-                year.revenueGrowth === null ? '-' : formatPercent(year.revenueGrowth),
-            ],
-          ].map(([label, formatter]) => (
+          {operatingSnapshotRows.map(([label, formatter]) => (
             <tr key={label as string} className={getRowClassName(label as string)}>
               <td className="w-44 py-2 pr-4 font-medium text-stone-900">
                 {renderLabelCell(label as string)}
