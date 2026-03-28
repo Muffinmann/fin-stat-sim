@@ -1,7 +1,9 @@
 export const rowFormulas: Record<string, string> = {
   Revenue: 'Revenue = Cups sold × Price per cup',
   EBIT: 'EBIT = Revenue - COGS - Labor cost - Depreciation',
+  'Interest expense': 'Interest expense = (Beginning debt + Debt issued) × Interest rate',
   EBT: 'EBT = EBIT - Interest expense',
+  Taxes: 'Taxes = EBT × Tax rate',
   'Net income': 'Net income = EBT - Taxes',
   CFO: 'CFO = Net income + Depreciation - Change in inventory',
   CFI: 'CFI = -Capex',

@@ -99,7 +99,6 @@ export const operatingSnapshotRows: TableRow[] = [
   ['Cups sold', (year) => formatInteger(year.cupsSold)],
   ['Price per cup', (year) => formatAccountingPrice(year.pricePerCup)],
   ['Revenue', (year) => formatAccountingCurrency(year.revenue)],
-  [ 'Revenue growth', (year) => (year.revenueGrowth === null ? '-' : formatPercent(year.revenueGrowth)), ],
   ['COGS', (year) => formatAccountingCurrency(year.cogs)],
   ['Labor cost', (year) => formatAccountingCurrency(year.laborCost)],
   ['Depreciation', (year) => formatAccountingCurrency(year.depreciation)],
@@ -113,6 +112,10 @@ export const operatingSnapshotRows: TableRow[] = [
   [
     'Per share growth',
     (year) => (year.perShareGrowth === null ? '-' : formatPercent(year.perShareGrowth)),
+  ],
+  [
+    'Revenue growth',
+    (year) => (year.revenueGrowth === null ? '-' : formatPercent(year.revenueGrowth)),
   ],
 ]
 

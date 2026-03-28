@@ -18,7 +18,6 @@ export const buildProjection = (params: Params) => {
   let beginningDebt = 0
   let beginningInventory = 0
   let fixedAssets = 0
-  let nolCarryforward = 0
 
   for (let yearIndex = 0; yearIndex < yearLabels.length; yearIndex += 1) {
     const newStands = clampNumber(params.annualStandAdds[yearIndex] ?? 0)
@@ -56,24 +55,12 @@ export const buildProjection = (params: Params) => {
     const changeInInventory = inventory - beginningInventory
 
     const provisionalEndingDebt = Math.max(0, beginningDebt + debtIssued - scheduledRepayment)
-    const averageDebt = (beginningDebt + provisionalEndingDebt) / 2
-    const interestExpense = averageDebt * (params.interestRatePct / 100)
+    const interestBearingDebt = beginningDebt + debtIssued
+    const interestExpense = interestBearingDebt * (params.interestRatePct / 100)
 
     const ebit = revenue - cogs - laborCost - depreciation
     const ebt = ebit - interestExpense
-
-    let taxableIncome = 0
-    let endingCarryforward = nolCarryforward
-
-    if (ebt >= 0) {
-      const nolUsed = Math.min(nolCarryforward, ebt)
-      taxableIncome = ebt - nolUsed
-      endingCarryforward = nolCarryforward - nolUsed
-    } else {
-      endingCarryforward = nolCarryforward + Math.abs(ebt)
-    }
-
-    const taxes = taxableIncome * (params.taxRatePct / 100)
+    const taxes = ebt * (params.taxRatePct / 100)
     const netIncome = ebt - taxes
 
     const cfo = netIncome + depreciation - changeInInventory
@@ -144,7 +131,6 @@ export const buildProjection = (params: Params) => {
     beginningCash = endingCash
     beginningDebt = debt
     beginningInventory = inventory
-    nolCarryforward = endingCarryforward
   }
 
   return years

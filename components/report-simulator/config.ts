@@ -7,7 +7,7 @@ export const defaultParams: Params = {
   startingCash: 0,
   sharesOutstanding: 1500,
   taxRatePct: 35,
-  interestRatePct: 0,
+  interestRatePct: 10,
   standCost: 300,
   usefulLifeYears: 5,
   startingGoodwill: 1000,
