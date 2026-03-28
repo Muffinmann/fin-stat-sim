@@ -108,12 +108,12 @@ export default function ReportSimulator() {
             <OperatingSnapshotTable years={years} />
           </DataCard>
 
-          <DataCard title="Balance Sheet">
-            <BalanceSheetTable years={years} />
-          </DataCard>
-
           <DataCard title="Cash Flow">
             <CashFlowTable years={years} />
+          </DataCard>
+
+          <DataCard title="Balance Sheet">
+            <BalanceSheetTable years={years} />
           </DataCard>
         </div>
       </section>
