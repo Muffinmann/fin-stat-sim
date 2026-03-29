@@ -22,6 +22,14 @@ import {
 import { DataCard } from './ui'
 import type { ParameterTab, Params, ScheduleParamKey } from './types'
 
+const cloneParams = (params: Params): Params => ({
+  ...params,
+  annualStandAdds: [...params.annualStandAdds],
+  annualDebtIssued: [...params.annualDebtIssued],
+  annualDebtRepaid: [...params.annualDebtRepaid],
+  annualEquityIssued: [...params.annualEquityIssued],
+})
+
 const buildTableMarkdown = (
   title: string,
   years: ReturnType<typeof buildProjection>,
@@ -58,7 +66,8 @@ const downloadMarkdown = (filename: string, markdown: string) => {
 }
 
 export default function ReportSimulator() {
-  const [params, setParams] = useState<Params>(defaultParams)
+  const [params, setParams] = useState<Params>(() => cloneParams(defaultParams))
+  const [baselineParams, setBaselineParams] = useState<Params>(() => cloneParams(defaultParams))
   const [activeTab, setActiveTab] = useState<ParameterTab>('foundation')
   const years = buildProjection(params)
 
@@ -78,6 +87,14 @@ export default function ReportSimulator() {
 
   const finalYear = years[years.length - 1]
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+
+  const resetToDefaults = () => {
+    setParams(cloneParams(defaultParams))
+  }
+
+  const saveAsBaseline = () => {
+    setBaselineParams(cloneParams(params))
+  }
 
   const TableExportButton = ({
     label,
@@ -115,7 +132,7 @@ export default function ReportSimulator() {
             Financial Sandbox
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
-            柠檬茶摊财报模拟器
+            财报模拟器
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
             用同一组经营参数联动利润表、现金流量表和资产负债表。你可以把扩张、提价、融资和成本放在一张画布里看清楚。
@@ -160,11 +177,13 @@ export default function ReportSimulator() {
           setActiveTab={setActiveTab}
           updateValue={updateValue}
           updateArrayValue={updateArrayValue}
+          resetToDefaults={resetToDefaults}
+          saveAsBaseline={saveAsBaseline}
         />
 
         <div className="space-y-8">
           <DataCard title="Version A · 基准 vs 当前">
-            <BaselineComparisonView params={params} />
+            <BaselineComparisonView params={params} baselineParams={baselineParams} />
           </DataCard>
 
           <DataCard title="Version B · 经营到现金桥图">

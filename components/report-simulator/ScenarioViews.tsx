@@ -1,4 +1,3 @@
-import { defaultParams } from './config'
 import { formatCurrency, formatPercent, formatPrice } from './format'
 import { buildProjection } from './projection'
 import type { Params, YearEntry } from './types'
@@ -135,8 +134,14 @@ const formatSignedCurrency = (value: number) => `${value >= 0 ? '+' : '-'}${form
 
 const formatSignedPercent = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`
 
-export function BaselineComparisonView({ params }: { params: Params }) {
-  const baseFinalYear = buildProjection(defaultParams).at(-1)
+export function BaselineComparisonView({
+  params,
+  baselineParams,
+}: {
+  params: Params
+  baselineParams: Params
+}) {
+  const baseFinalYear = buildProjection(baselineParams).at(-1)
   const currentFinalYear = buildProjection(params).at(-1)
 
   if (!baseFinalYear || !currentFinalYear) {

@@ -9,6 +9,8 @@ type Props = {
   setActiveTab: (tab: ParameterTab) => void
   updateValue: (name: keyof Params) => (value: number) => void
   updateArrayValue: (name: ScheduleParamKey) => (yearIndex: number, value: number) => void
+  resetToDefaults: () => void
+  saveAsBaseline: () => void
 }
 
 export default function ParameterPanel({
@@ -17,6 +19,8 @@ export default function ParameterPanel({
   setActiveTab,
   updateValue,
   updateArrayValue,
+  resetToDefaults,
+  saveAsBaseline,
 }: Props) {
   const activeTabMeta = parameterTabs.find((tab) => tab.key === activeTab) ?? parameterTabs[0]
 
@@ -114,6 +118,22 @@ export default function ParameterPanel({
             {activeTab === 'financing'
               ? '融资计划按年份录入，方便观察扩张和融资节奏对现金与负债的影响。'
               : '切换上方 tab 可以查看不同类别的参数。'}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3 border-t border-stone-200 pt-4">
+            <button
+              type="button"
+              onClick={resetToDefaults}
+              className="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 transition hover:border-stone-400 hover:bg-stone-100"
+            >
+              返回出场参数
+            </button>
+            <button
+              type="button"
+              onClick={saveAsBaseline}
+              className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-800"
+            >
+              设为新基准
+            </button>
           </div>
         </div>
       </div>
