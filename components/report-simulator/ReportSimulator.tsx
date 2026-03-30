@@ -2,6 +2,11 @@
 
 import { useState } from 'react'
 
+import {
+  chartLabels,
+  defaultChartSelections,
+  getChartPoolItems,
+} from './chartConfig'
 import { defaultParams } from './config'
 import {
   balanceSheetRows,
@@ -20,7 +25,7 @@ import {
   SensitivityView,
 } from './ScenarioViews'
 import { DataCard } from './ui'
-import type { ParameterTab, Params, ScheduleParamKey } from './types'
+import type { ChartKey, ParameterTab, Params, ScheduleParamKey } from './types'
 
 const cloneParams = (params: Params): Params => ({
   ...params,
@@ -69,6 +74,9 @@ export default function ReportSimulator() {
   const [params, setParams] = useState<Params>(() => cloneParams(defaultParams))
   const [baselineParams, setBaselineParams] = useState<Params>(() => cloneParams(defaultParams))
   const [activeTab, setActiveTab] = useState<ParameterTab>('foundation')
+  const [chartSelections, setChartSelections] =
+    useState<Record<ChartKey, string[]>>(defaultChartSelections)
+  const [openChartMenu, setOpenChartMenu] = useState<ChartKey | null>(null)
   const years = buildProjection(params)
 
   const updateValue = (name: keyof Params) => (value: number) => {
@@ -94,6 +102,20 @@ export default function ReportSimulator() {
 
   const saveAsBaseline = () => {
     setBaselineParams(cloneParams(params))
+  }
+
+  const addItemToChart = (chart: ChartKey, itemId: string) => {
+    setChartSelections((current) => ({
+      ...current,
+      [chart]: current[chart].includes(itemId) ? current[chart] : [...current[chart], itemId],
+    }))
+  }
+
+  const removeItemFromChart = (chart: ChartKey, itemId: string) => {
+    setChartSelections((current) => ({
+      ...current,
+      [chart]: current[chart].filter((currentItemId) => currentItemId !== itemId),
+    }))
   }
 
   const TableExportButton = ({
@@ -123,6 +145,57 @@ export default function ReportSimulator() {
       </svg>
     </button>
   )
+
+  const ChartPoolButton = ({ chart }: { chart: ChartKey }) => {
+    const isOpen = openChartMenu === chart
+    const selectedIds = new Set(chartSelections[chart])
+    const availableItems = getChartPoolItems(chart).filter((item) => !selectedIds.has(item.id))
+
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          aria-label={`向${chartLabels[chart]}添加项目`}
+          aria-expanded={isOpen}
+          onClick={() => setOpenChartMenu((current) => (current === chart ? null : chart))}
+          className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3 py-2 text-xs font-medium text-stone-700 transition hover:border-emerald-700 hover:text-emerald-700"
+        >
+          <svg viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+            <path
+              d="M10 4.5v11m-5.5-5.5h11"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+            />
+          </svg>
+          添加项目
+        </button>
+
+        {isOpen ? (
+          <div className="absolute right-0 top-11 z-20 max-h-[320px] w-[260px] overflow-y-auto rounded-[1.25rem] border border-stone-200 bg-white p-2 shadow-[0_20px_50px_-35px_rgba(0,0,0,0.45)]">
+            {availableItems.length > 0 ? (
+              availableItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    addItemToChart(chart, item.id)
+                    setOpenChartMenu(null)
+                  }}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs text-stone-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+                >
+                  <span>{item.label}</span>
+                  <span>添加</span>
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-4 text-xs text-stone-500">这个视图的可添加项已经全部显示。</div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
@@ -182,16 +255,30 @@ export default function ReportSimulator() {
         />
 
         <div className="space-y-8">
-          <DataCard title="Version A · 基准 vs 当前">
-            <BaselineComparisonView params={params} baselineParams={baselineParams} />
+          <DataCard title="Version A · 基准 vs 当前" actions={<ChartPoolButton chart="baseline" />}>
+            <BaselineComparisonView
+              params={params}
+              baselineParams={baselineParams}
+              selectedItems={chartSelections.baseline}
+              onRemoveItem={(itemId) => removeItemFromChart('baseline', itemId)}
+            />
           </DataCard>
 
-          <DataCard title="Version B · 经营到现金桥图">
-            <ProfitBridgeView years={years} />
+          <DataCard title="Version B · 经营到现金桥图" actions={<ChartPoolButton chart="bridge" />}>
+            <ProfitBridgeView
+              params={params}
+              years={years}
+              selectedHighlights={chartSelections.bridge}
+              onRemoveItem={(itemId) => removeItemFromChart('bridge', itemId)}
+            />
           </DataCard>
 
-          <DataCard title="Version C · 参数敏感度">
-            <SensitivityView params={params} />
+          <DataCard title="Version C · 参数敏感度" actions={<ChartPoolButton chart="sensitivity" />}>
+            <SensitivityView
+              params={params}
+              selectedItems={chartSelections.sensitivity}
+              onRemoveItem={(itemId) => removeItemFromChart('sensitivity', itemId)}
+            />
           </DataCard>
 
           <DataCard

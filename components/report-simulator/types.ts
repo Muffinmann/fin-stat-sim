@@ -86,3 +86,7 @@ export type ScheduleConfig = {
 }
 
 export type ParameterTab = 'foundation' | 'operations' | 'financing'
+
+export type ChartKey = 'baseline' | 'bridge' | 'sensitivity'
+
+export type DisplayableParamKey = ScalarParamKey | ScheduleParamKey
